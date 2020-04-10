@@ -18,9 +18,26 @@ int main()
 		if (threadNo == 0)
 			std::cout << " OMP_NUM_THREADS: " << totalThreads << std::endl;
 
-		SETTHREADPROCESSORGROUP(&threadNo, &totalThreads);
+		// SETTHREADPROCESSORGROUP(&threadNo, &totalThreads);
 	}
 
+	double aa = 0.0;
+#pragma omp parallel
+	{
+		double a = 0;
+#pragma omp for
+		for (int i = 0; i < 1000000; ++i) {
+			for (int j = 0; j < 1000000; ++j) {
+				for (int k = 0; k < 1000000; ++k) {
+					a += j + i + 10 * j + k;
+				}
+			}
+		}
+#pragma omp critical
+			{
+				aa += a;
+			}
+	}
 	return 1;
 }
 

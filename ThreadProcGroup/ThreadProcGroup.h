@@ -7,3 +7,5 @@
 #endif
 
 extern "C" THREADPROCGROUP_API void SETTHREADPROCESSORGROUP(int *ompThreadNo, int *ompTotalThreads);
+
+extern "C" THREADPROCGROUP_API void TEST();

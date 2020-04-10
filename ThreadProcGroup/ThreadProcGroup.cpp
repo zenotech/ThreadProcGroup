@@ -22,7 +22,12 @@
 
  *
  */
+void TEST() {
+	std::cout << "In library" << std::endl;
+}
+
 void SETTHREADPROCESSORGROUP(int *ompThreadNo, int *ompTotalThreads) {
+
 	WORD procGroupCount = GetActiveProcessorGroupCount();
 	DWORD procCount = GetActiveProcessorCount(0);
 
@@ -65,14 +70,31 @@ void SETTHREADPROCESSORGROUP(int *ompThreadNo, int *ompTotalThreads) {
 		groupAffinity.Group = threadGroup;
 		groupAffinity.Mask = (1ULL << (*ompThreadNo % threadsPerGroup));
 
-		// Debugging - comment out for release
-		if (*ompThreadNo % threadsPerGroup == 0) {
-			std::cout << " Thread: " << *ompThreadNo << " using Proc Group: " << threadGroup << std::endl;
-		}
-
 		BOOL err = SetThreadGroupAffinity(thread, &groupAffinity, &previousAffinity);
 		if (err == 0) {
 			std::cout << " SetThreadProcessorGroup: Failed to set thread processor group affinity" << std::endl;
+			LPVOID lpMsgBuf;
+			LPVOID lpDisplayBuf;
+			DWORD lastError = GetLastError();			FormatMessage(
+				FORMAT_MESSAGE_ALLOCATE_BUFFER |
+				FORMAT_MESSAGE_FROM_SYSTEM |
+				FORMAT_MESSAGE_IGNORE_INSERTS,
+				NULL,
+				lastError,
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+				(LPTSTR)&lpMsgBuf,
+				0, NULL);
+			std::cout << (LPTSTR)lpMsgBuf << std::endl;
+			LocalFree(lpMsgBuf);
 		}
+
+		// Debugging - comment out for release
+		if (*ompThreadNo % threadsPerGroup == 0) {
+#pragma omp critical
+			{
+				std::cout << " Thread: " << *ompThreadNo << " Proc Group change: " << previousAffinity.Group << " -> " <<  threadGroup << std::endl;
+			}
+		}
+
 	}
 }
